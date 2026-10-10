@@ -23,7 +23,7 @@ export function setVenueToken(token: string | null) {
 
 /**
  * Every request carries the venue session token (when logged in) as the
- * x-venue-token header. The RLS policies in supabase/schema.sql read it to decide
+ * x-venue-token header. The RLS policies in supabase/migrations/ read it to decide
  * whether the request may see and change bookings.
  */
 export const supabase = createClient(url || 'https://not-configured.supabase.co', key || 'not-configured', {

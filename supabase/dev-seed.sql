@@ -1,6 +1,6 @@
 -- DEV ONLY: fills the next 7 days with believable bookings, so the venue view
 -- doesn't look empty in a demo. Busy Friday/Saturday nights, quiet afternoons.
--- Run in the Supabase SQL editor after schema.sql. Safe to run more than once
+-- Run in the Supabase SQL editor after the init migration. Safe to run more than once
 -- (it skips slots that are already taken).
 --
 -- Every seeded booking has phone '06 0000 0000'. To remove them all:

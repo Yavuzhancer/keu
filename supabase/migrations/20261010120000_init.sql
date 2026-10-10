@@ -1,8 +1,13 @@
--- Keu database schema (Supabase / Postgres)
+-- Keu database schema (Supabase / Postgres), first migration.
 --
--- Run once on a fresh Supabase project:
---   Dashboard → SQL Editor → New query → paste this whole file → Run.
--- Then set the venue PIN (see the bottom of this file / README).
+-- Applied automatically by Supabase's GitHub integration on push to main
+-- (each file in supabase/migrations/ runs once, in filename order). Future
+-- schema changes go in new, later-timestamped files; never edit this one after
+-- it has been applied.
+-- Without the integration: paste this file into Dashboard → SQL Editor and run
+-- it once on a fresh project (then don't also enable the integration, or it
+-- will try to apply it a second time).
+-- After it has run, set the venue PIN (see the bottom of this file / README).
 --
 -- Security model, no Supabase Auth needed:
 --   * Players are anonymous. They can read venues, tables, opening hours and the

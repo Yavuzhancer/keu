@@ -1,4 +1,4 @@
-// All database access. Tables and policies are defined in supabase/schema.sql.
+// All database access. Tables and policies are defined in supabase/migrations/.
 import { getVenueToken, setVenueToken, supabase } from './supabase'
 import type { Booking, BookingStatus, Busy, GameType, NewBooking, OpenHours, Settings, VenueInfo } from './types'
 

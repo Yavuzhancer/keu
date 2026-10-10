@@ -30,33 +30,49 @@ src/
   player/              booking flow
   venue/               PIN screen, timeline, sheets, settings
 supabase/
-  schema.sql           tables, constraints, RLS, functions, seed data
+  migrations/          database schema: tables, constraints, RLS, functions, venue data
   dev-seed.sql         optional fake bookings for demos
 ```
 
 ## Set up Supabase
 
-1. Create a project at [supabase.com](https://supabase.com) (pick an EU region, e.g. Frankfurt).
-2. In the dashboard, open **SQL Editor → New query**, paste all of
-   [supabase/schema.sql](supabase/schema.sql) and click **Run**. Run it once, on a fresh project.
-3. Set the venue PIN. In a new query, with your own PIN or password in place of `change-me`
-   (longer is safer; the login locks for 5 minutes after 5 wrong tries):
+The schema lives in [supabase/migrations/](supabase/migrations/). Supabase's GitHub integration
+applies new files there on every push to `main`, and records which ones it has run.
+
+1. Push this repo to GitHub first (see [Deploy](#deploy-to-github-pages)).
+2. Create a project at [supabase.com](https://supabase.com) (pick an EU region, e.g. Frankfurt).
+   Under **GitHub (optional)** choose this repo. For an existing project, use
+   **Project Settings → Integrations → GitHub** instead. Set the Supabase directory to `.` (the
+   repo root), the production branch to `main`, and turn on **Deploy to production**.
+3. Check the first migration ran: **Table Editor** should list `venues`, `tables`, `bookings`
+   and the rest. If it's empty, push a commit to `main` (or use **Sync** in the integration settings).
+   - No GitHub integration? Paste
+     [the init migration](supabase/migrations/20261010120000_init.sql) into **SQL Editor → New query**
+     and run it once instead. Don't do both, or the second run fails on tables that already exist.
+4. Set the venue PIN. In **SQL Editor → New query**, with your own PIN or password in place of
+   `change-me` (longer is safer; the login locks for 5 minutes after 5 wrong tries):
    ```sql
    update public.venue_settings
       set pin_hash = extensions.crypt('change-me', extensions.gen_salt('bf'))
     where venue_id = (select id from public.venues where slug = 'de-peper');
    ```
-   Run the same statement again any time to change it.
-4. Optional, for demos: run [supabase/dev-seed.sql](supabase/dev-seed.sql) to fill the next 7
-   days with believable bookings. Remove them later with
+   Run the same statement again any time to change it. Never put the PIN in a migration file:
+   the repo is public.
+5. Optional, for demos: run [supabase/dev-seed.sql](supabase/dev-seed.sql) in the SQL Editor to fill
+   the next 7 days with believable bookings. Remove them later with
    `delete from public.bookings where phone = '06 0000 0000';`
-5. Copy your keys from **Project Settings → API Keys** (or the **Connect** button): the
+6. Copy your keys from **Project Settings → API Keys** (or the **Connect** button): the
    **Project URL** and the **anon** (or **publishable**) key. Never use the `service_role`/secret key
    in the app.
 
+### Changing the database later
+
+Add a new file such as `supabase/migrations/20261101090000_add_student_flag.sql` with only the
+change (`alter table …`), commit and push. Never edit a migration that has already run.
+
 ### How access works
 
-There is no Supabase Auth yet. Row Level Security (see the bottom half of `schema.sql`) does the work:
+There is no Supabase Auth yet. Row Level Security (bottom half of the init migration) does the work:
 
 - Anyone can read venues, tables, opening hours and the public settings. They can see *which*
   slots are taken through the `busy_slots()` function, but never names or phone numbers. They
