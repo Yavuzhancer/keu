@@ -208,3 +208,7 @@ body.has-bar .wrap{padding-bottom:110px}
 
 /* ---------- Additions for the real app ---------- */
 .btn:disabled{opacity:.6;cursor:default}
+.login{padding:16px;margin-top:4px}
+.login .btn{width:100%}
+.logout{margin-top:16px}
+.set-err{margin:0 0 12px}

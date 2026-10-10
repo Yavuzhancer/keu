@@ -46,6 +46,9 @@ const en = {
   payLater:"Online payment isn't live yet, so you'll pay at the bar.",
   closedDay:'Closed this day.', phoneShort:'Phone',
   overlapAny:'That runs into another booking. Pick a shorter time.',
+  loginTitle:'Venue login', loginSub:'Bookings include names and phone numbers, so this part is for staff only.',
+  pin:'Venue PIN or password', unlock:'Unlock', logout:'Log out',
+  pinErr:"That didn't work. After 5 wrong tries, login locks for 5 minutes.",
 }
 
 type Key = keyof typeof en
@@ -91,6 +94,9 @@ const nl: Record<Key, string> = {
   payLater:'Online betalen werkt nog niet, je betaalt aan de bar.',
   closedDay:'Op deze dag gesloten.', phoneShort:'Telefoon',
   overlapAny:'Dat loopt door in een andere reservering. Kies een kortere tijd.',
+  loginTitle:'Inloggen zaak', loginSub:'Reserveringen bevatten namen en telefoonnummers, dus dit deel is alleen voor personeel.',
+  pin:'Pincode of wachtwoord van de zaak', unlock:'Ontgrendelen', logout:'Uitloggen',
+  pinErr:'Dat klopt niet. Na 5 foute pogingen is inloggen 5 minuten geblokkeerd.',
 }
 
 const STRINGS: Record<Lang, Record<Key, string>> = { en, nl }

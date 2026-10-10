@@ -18,7 +18,7 @@ const NEW_FOR_MS = 24 * 3600_000
 
 type SheetState = { type: 'detail'; id: string } | { type: 'add'; tableId: string; start: number } | null
 
-export function VenueView({ info, dayIdx, setDayIdx, focusId, clearFocus, reloadInfo }: {
+export function VenueView({ info, dayIdx, setDayIdx, focusId, clearFocus, reloadInfo, onLogout }: {
   info: VenueInfo
   dayIdx: number
   setDayIdx: (i: number) => void
@@ -26,6 +26,7 @@ export function VenueView({ info, dayIdx, setDayIdx, focusId, clearFocus, reload
   focusId: string | null
   clearFocus: () => void
   reloadInfo: () => Promise<void>
+  onLogout: () => void
 }) {
   const { t, dayLong } = useI18n()
   const { venue, tables } = info
@@ -79,6 +80,7 @@ export function VenueView({ info, dayIdx, setDayIdx, focusId, clearFocus, reload
       </div>
       <p className="note">{t('tapHint')}</p>
       <SettingsCard info={info} onSaved={reloadInfo} />
+      <button className="btn ghost logout" onClick={onLogout}>{t('logout')}</button>
       <p className="foot">{t('footer')}</p>
 
       {sheet && (
