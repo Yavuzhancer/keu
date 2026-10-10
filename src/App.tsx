@@ -1,3 +1,43 @@
+import { useCallback, useEffect, useState } from 'react'
+import { Header } from './components/Header'
+import { LangContext, initialLang, makeI18n, type Lang } from './i18n'
+import { loadVenueInfo } from './lib/api'
+import { useHashRoute, usePolled, type Route } from './lib/hooks'
+import { PlayerView } from './player/PlayerView'
+import { initialSel, type Contact, type PlayerSel } from './player/state'
+
+/** The one venue this build serves. */
+const VENUE_SLUG = 'de-peper'
+
 export default function App() {
-  return <div className="wrap">Keu</div>
+  const [lang, setLangState] = useState<Lang>(initialLang)
+  const [route, go] = useHashRoute()
+  const info = usePolled(VENUE_SLUG, () => loadVenueInfo(VENUE_SLUG), 60_000)
+  const [sel, setSel] = useState<PlayerSel>(initialSel)
+  const [contact, setContact] = useState<Contact>({ name: '', phone: '' })
+  const { t } = makeI18n(lang)
+
+  const setLang = useCallback((l: Lang) => {
+    setLangState(l)
+    try { localStorage.setItem('keu.lang', l) } catch { /* storage blocked */ }
+  }, [])
+  useEffect(() => { document.documentElement.lang = lang }, [lang])
+
+  const navigate = (r: Route) => { go(r); window.scrollTo(0, 0) }
+
+  return (
+    <LangContext.Provider value={{ lang, setLang }}>
+      <div className={`wrap${route === 'venue' ? ' wide' : ''}`}>
+        <Header route={route} onRoute={navigate} />
+        {!info.data ? (
+          <p className="muted">{info.error ? t('netErr') : t('loading')}</p>
+        ) : route === 'player' ? (
+          <PlayerView info={info.data} sel={sel} setSel={setSel} contact={contact} setContact={setContact}
+            onSeeVenue={() => navigate('venue')} />
+        ) : (
+          <p className="muted">Venue view comes next.</p>
+        )}
+      </div>
+    </LangContext.Provider>
+  )
 }
