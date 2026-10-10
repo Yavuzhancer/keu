@@ -1,0 +1,687 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Keu booking demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1F4F1; --card:#FFFFFF; --ink:#15211B; --muted:#5A6761; --line:#DAE1DC;
+  --cloth:#0F6B4C; --cloth-hi:#1F8E66; --cloth-lo:#0A4C36; --rail:#6A4127;
+  --chalk:#2B66AE; --chalk-hover:#22558F; --chalk-tint:#E1EBF7;
+  --ball:#F4C21B; --ball-tint:#FFF6D6; --red:#C23A2E; --red-tint:#F8E2DF; --green-tint:#DCF0E5;
+  --display:'Big Shoulders Display','Arial Narrow',sans-serif;
+  --body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --r-lg:16px; --r-md:10px;
+  --on-ink:#FFFFFF; --track:#E1E7E2; --faint:#9AA59F; --hover:#EDF2EE; --dash:#B9C4BC; --field:#FFFFFF;
+  --stripe-a:#EDF1EE; --stripe-b:#F8FAF8; --switch-off:#C6CFC9; --ok-text:#0F6B4C; --bad-text:#C23A2E;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0E1512; --card:#16201C; --ink:#E4ECE7; --muted:#9AA8A1; --line:#2A3631;
+  --chalk-tint:#1B2D43; --ball-tint:#3A3214; --red-tint:#40211D; --green-tint:#163A2A;
+  --on-ink:#0E1512; --track:#1F2A25; --faint:#5F6C66; --hover:#1E2924; --dash:#3A4741; --field:#101915;
+  --stripe-a:#1A2420; --stripe-b:#141D19; --switch-off:#3A4741; --ok-text:#5CC79A; --bad-text:#F0806F;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0E1512; --card:#16201C; --ink:#E4ECE7; --muted:#9AA8A1; --line:#2A3631;
+  --chalk-tint:#1B2D43; --ball-tint:#3A3214; --red-tint:#40211D; --green-tint:#163A2A;
+  --on-ink:#0E1512; --track:#1F2A25; --faint:#5F6C66; --hover:#1E2924; --dash:#3A4741; --field:#101915;
+  --stripe-a:#1A2420; --stripe-b:#141D19; --switch-off:#3A4741; --ok-text:#5CC79A; --bad-text:#F0806F;
+  color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+body.locked{overflow:hidden}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2.5px solid var(--chalk);outline-offset:2px}
+.muted{color:var(--muted)}
+
+.wrap{max-width:480px;margin:0 auto;padding:0 16px 40px}
+.wrap.wide{max-width:1000px}
+body.has-bar .wrap{padding-bottom:110px}
+
+.top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 12px}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;display:block}
+.word{font-family:var(--display);font-weight:800;font-size:28px;line-height:1}
+.demo{font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px;background:var(--card)}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;background:var(--card);padding:2px}
+.lang button{border:0;background:none;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--ink);color:var(--on-ink)}
+
+.views{display:grid;grid-template-columns:1fr 1fr;background:var(--track);border-radius:12px;padding:4px;margin-bottom:16px}
+.wide .views{max-width:448px}
+.views button{border:0;background:none;padding:9px 8px;border-radius:9px;font-weight:600;cursor:pointer;color:var(--muted)}
+.views button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(21,33,27,.14)}
+
+/* The one bold thing: lamp-lit cloth inside a wooden rail */
+.felt{background:radial-gradient(ellipse 90% 85% at 50% 28%,var(--cloth-hi) 0%,var(--cloth) 55%,var(--cloth-lo) 100%);color:#fff;border-radius:var(--r-lg);border:7px solid var(--rail);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25),0 6px 18px rgba(10,76,54,.22)}
+.venue{padding:18px 18px 16px}
+.venue h1{font-family:var(--display);font-weight:800;font-size:40px;line-height:.95;margin:0 0 10px}
+.venue p{margin:2px 0;color:rgba(255,255,255,.88);font-size:14px}
+.venue .price{margin-top:8px;color:#fff}
+
+.game{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.opt{border:1.5px solid var(--line);background:var(--card);border-radius:var(--r-md);padding:10px 12px;text-align:left;cursor:pointer}
+.opt strong{display:block;font-size:16px}
+.opt small{color:var(--muted);font-size:13px}
+.opt[aria-pressed=true]{border-color:var(--chalk);box-shadow:inset 0 0 0 1px var(--chalk);background:var(--chalk-tint)}
+.opt:disabled{opacity:.45;cursor:default}
+
+.blk{margin-top:22px}
+.blk h2{font-size:15px;font-weight:600;margin:0 0 8px}
+
+.days{position:relative;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px}
+.days::-webkit-scrollbar{display:none}
+.day{flex:none;width:58px;border:1.5px solid var(--line);background:var(--card);border-radius:var(--r-md);padding:6px 0 7px;text-align:center;cursor:pointer}
+.day small{display:block;font-size:12px;color:var(--muted);text-transform:capitalize}
+.day b{display:block;font-family:var(--display);font-weight:800;font-size:25px;line-height:1.05}
+.day[aria-pressed=true]{background:var(--chalk);border-color:var(--chalk);color:#fff}
+.day[aria-pressed=true] small{color:rgba(255,255,255,.85)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-weight:600;font-size:14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--chalk);border-color:var(--chalk);color:#fff}
+
+.times{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.time{border:1.5px solid var(--line);background:var(--card);border-radius:var(--r-md);padding:6px 0 5px;cursor:pointer;text-align:center}
+.time b{display:block;font-family:var(--display);font-weight:800;font-size:22px;line-height:1.05;font-variant-numeric:tabular-nums}
+.time small{display:block;font-size:11.5px;color:var(--ok-text);font-weight:600}
+.time:disabled{cursor:default;background:transparent;border-style:dashed;color:var(--faint)}
+.time:disabled small{color:var(--bad-text)}
+.time[aria-pressed=true]{background:var(--chalk);border-color:var(--chalk);color:#fff}
+.time[aria-pressed=true] small{color:#fff}
+
+.floor{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:8px}
+.floor.snooker{grid-template-columns:1fr}
+.tb{appearance:none;border:0;background:none;padding:8px 6px 6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
+.tb svg{width:100%;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.2))}
+.tb .tb-n{font-family:var(--display);font-weight:800;font-size:46px;fill:rgba(255,255,255,.9)}
+.tb.snooker .tb-n{font-size:64px}
+.tb-l{font-size:12.5px;font-weight:600;color:var(--ok-text)}
+.tb.free:hover{background:var(--hover)}
+.tb.taken,.tb.held{cursor:default}
+.tb.taken svg,.tb.held svg{filter:grayscale(1) opacity(.32)}
+.tb.taken .tb-l,.tb.held .tb-l{color:var(--muted);font-weight:500}
+.tb.sel{background:var(--ball-tint);box-shadow:inset 0 0 0 3px var(--ball)}
+.tb.sel .tb-l{color:var(--ink)}
+.note{font-size:13.5px;color:var(--muted);margin:8px 0 0}
+
+.hub{margin-top:26px;padding:14px 16px;border:1.5px dashed var(--dash);border-radius:var(--r-lg);color:var(--muted);font-size:14px}
+.hub strong{display:block;color:var(--ink);margin-bottom:2px}
+.foot{margin-top:24px;font-size:12.5px;color:var(--muted)}
+
+.btn{border:0;background:var(--chalk);color:#fff;font-weight:600;padding:11px 18px;border-radius:var(--r-md);cursor:pointer;font-size:15px}
+.btn:hover{background:var(--chalk-hover)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.ghost:hover{background:var(--hover)}
+.btn.green{background:var(--cloth)}
+.btn.green:hover{background:var(--cloth-lo)}
+.btn.danger{background:transparent;color:var(--bad-text)}
+.btn.danger:hover{background:var(--red-tint)}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(21,33,27,.08)}
+.bar-in{max-width:448px;margin:0 auto;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.bar-txt{min-width:0}
+.bar-txt strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-txt span{display:block;font-size:13px;color:var(--muted);white-space:nowrap}
+.bar-r{display:flex;align-items:center;gap:10px;flex:none}
+.bar-p{font-family:var(--display);font-weight:800;font-size:22px}
+
+/* Sheets */
+.sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.scrim{position:absolute;inset:0;background:rgba(10,20,15,.45)}
+.panel{position:relative;width:100%;max-width:480px;max-height:92vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom))}
+.panel.anim{animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(28px);opacity:.5}to{transform:none;opacity:1}}
+@media (min-width:640px){.sheet{align-items:center}.panel{border-radius:20px;padding-bottom:20px}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sh-t{font-family:var(--display);font-weight:800;font-size:32px;line-height:1;margin:4px 0}
+.sh-sub{margin:0 0 16px;color:var(--muted)}
+.fld{display:block;margin-bottom:14px}
+.fld>span{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+.fld input{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--field);color:var(--ink)}
+.fld input:focus{border-color:var(--chalk);outline:none;box-shadow:0 0 0 3px var(--chalk-tint)}
+.err{display:block;color:var(--bad-text);font-style:normal;font-size:13.5px;margin:6px 0 0}
+.check{display:flex;gap:9px;align-items:flex-start;font-size:14px;margin:0 0 14px;cursor:pointer}
+.check input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--chalk);flex:none}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pay .opt{font-weight:600;font-size:14px}
+.sh-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:14px;margin-top:8px}
+.sh-foot small{display:block;color:var(--muted);font-size:13px}
+.sh-foot strong{font-family:var(--display);font-size:30px;font-weight:800;line-height:1}
+.sh-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.sh-actions .btn{flex:1 1 auto}
+.sh-actions.col{flex-direction:column}
+.dl{margin:0 0 4px;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.dl dt{font-size:13px;color:var(--muted)}
+.dl dd{margin:0;font-weight:600}
+.dl dd::first-letter{text-transform:uppercase}
+
+.ticket{display:flex;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);margin-top:6px}
+.ticket .felt{border-radius:0;border:0;border-right:7px solid var(--rail);box-shadow:none;width:96px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0}
+.ticket-n{font-family:var(--display);font-weight:800;font-size:60px;line-height:.9}
+.ticket-type{font-size:12.5px;opacity:.88}
+.ticket-body{padding:14px 16px}
+.ticket-body h2{font-family:var(--display);font-size:28px;font-weight:800;line-height:1.02;margin:0 0 6px}
+.ticket-body p{margin:0;color:var(--muted);font-size:14px}
+
+/* Venue view */
+.vhead h1{font-family:var(--display);font-weight:800;font-size:40px;line-height:1;margin:0}
+.vdate{margin:4px 0 12px}
+.summary{margin:14px 0 12px;font-size:15px}
+.tl-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.tl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tl-inner{position:relative}
+.tl-head,.tl-row{display:flex}
+.tl-head{height:30px;border-bottom:1px solid var(--line)}
+.tl-name{position:sticky;left:0;z-index:3;flex:none;width:92px;white-space:nowrap;background:var(--card);border-right:1px solid var(--line);display:flex;align-items:center;padding:0 10px;font-weight:600;font-size:13px}
+.tl-hours{position:relative;flex:none}
+.tl-hours span{position:absolute;top:7px;font-size:12px;color:var(--muted);transform:translateX(5px);font-variant-numeric:tabular-nums}
+.tl-row{height:50px;border-bottom:1px solid var(--line)}
+.tl-row:last-child{border-bottom:0}
+.tl-track{position:relative;flex:none;cursor:copy;background-image:repeating-linear-gradient(to right,var(--line) 0 1px,transparent 1px var(--hw))}
+.tl-row.held .tl-track{background-image:repeating-linear-gradient(to right,var(--line) 0 1px,transparent 1px var(--hw)),repeating-linear-gradient(135deg,var(--stripe-a) 0 7px,var(--stripe-b) 7px 14px)}
+.tl-row.held .tl-name{color:var(--muted)}
+.held-l{position:sticky;left:calc(var(--nw) + 8px);display:inline-block;margin-left:8px;line-height:48px;font-size:12px;color:var(--muted);pointer-events:none}
+.bk{position:absolute;top:6px;bottom:6px;border:0;border-left:3px solid var(--chalk);background:var(--chalk-tint);border-radius:6px;padding:3px 6px;text-align:left;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:center;font-size:12.5px;line-height:1.15;color:var(--ink);z-index:1}
+.bk span{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk small{color:var(--muted);font-size:11.5px}
+.bk.arrived{background:var(--green-tint);border-left-color:var(--cloth)}
+.bk.noshow{background:var(--red-tint);border-left-color:var(--red)}
+.bk.noshow span{text-decoration:line-through;color:var(--muted)}
+.bk.new{background:var(--ball-tint);border-left-color:var(--ball);box-shadow:inset 0 0 0 2px var(--ball)}
+.nowline{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:2;pointer-events:none}
+.nowline::before{content:'';position:absolute;top:25px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--red)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:10px 2px 0}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;border-left:3px solid}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:6px 16px;margin-top:20px;max-width:560px}
+.card h2{font-size:15px;font-weight:600;margin:10px 0 2px}
+.set{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.card h2 + .set{border-top:0}
+.set p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.stepper{display:flex;align-items:center;gap:4px;flex:none}
+.stepper button{width:36px;height:36px;border-radius:50%;border:0;box-shadow:inset 0 0 0 1.5px var(--line);background:var(--card);font-size:20px;line-height:1;cursor:pointer}
+.stepper button:disabled{opacity:.35;cursor:default}
+.stepper span{font-family:var(--display);font-weight:800;font-size:28px;width:28px;text-align:center}
+.switch{flex:none;width:50px;height:30px;border-radius:999px;border:0;background:var(--switch-off);position:relative;cursor:pointer;transition:background .15s}
+.switch span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.switch[aria-checked=true]{background:var(--cloth)}
+.switch[aria-checked=true] span{transform:translateX(20px)}
+
+@media (prefers-reduced-motion:reduce){.panel.anim{animation:none}.switch,.switch span{transition:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="bar" class="bar" hidden></div>
+<div id="sheet" class="sheet" hidden></div>
+
+<script>
+const I18N = {
+  en: {
+    demo:'Concept demo', tabPlayer:'Book a table', tabVenue:'Venue view',
+    openToday:'Open today {a}–{b}', priceLine:'{a} per hour, students {c}. {b} before 17:00 and on Sundays.',
+    pool:'Pool', snooker:'Snooker', nTables:'{n} tables',
+    when:'When', today:'Today', howLong:'How long', h1:'1 hour', h15:'1½ hours', h2:'2 hours',
+    pickTime:'Pick a time', free:'{n} free', full:'Full', noTimes:'No times left today. Pick another day.',
+    pickTable:'Pick a table', poolTable:'Pool table {n}', snookerTable:'Snooker table {n}',
+    tFree:'Free', taken:'Taken', walkin:'Walk-in', yours:'Your table',
+    heldNote:'{n} pool tables stay free for walk-ins.', heldNote1:'1 pool table stays free for walk-ins.',
+    book:'Book table',
+    hubTitle:'Full here?', hubBody:'Next step: see free tables at other pool spots in Delft, in the same app.',
+    footer:"Concept demo. It isn't connected to Poolcafé de Peper's real reservations, so nothing booked here is real. Prices come from public info and may be out of date.",
+    yourName:'Your name', name:'Name', namePh:'e.g. Sanne', nameErr:"Add your name so the bar knows who's coming.",
+    phone:'Phone number, for a reminder text', players:'Players', student:"I'm a student and will show my card at the bar",
+    payment:'Payment', payBar:'Pay at the bar', payNow:'Prepay with iDEAL',
+    prepayReq:'On Friday and Saturday evenings this bar asks you to prepay.', total:'Total',
+    headline:'{table} is yours', playersN:'{n} players', paidBar:'pay at the bar', paidNow:'prepaid',
+    reminder:"You'll get a reminder text 2 hours before. Can't make it? Cancel in the app so someone else can play.",
+    demoNote:'This is a demo, so no real table was booked.',
+    seeVenue:'See it in the venue view', done:'Done',
+    vTitle:'Bookings', vSum:'{n} bookings for {p} players.', vSum1:'1 booking for {p} players.',
+    vApp:'{a} came in through the app, the rest by phone or WhatsApp.', vApp1:'1 came in through the app, the rest by phone or WhatsApp.',
+    vEmpty:'No bookings yet.',
+    tapHint:'Tap an empty spot in a row to add a phone or WhatsApp booking.',
+    lgBooked:'Booked', lgArrived:'Arrived', lgNoshow:'No-show', lgNew:'New from the app',
+    settings:'Settings', holdLabel:'Pool tables kept free for walk-ins', holdHelp:'These tables never show up for online booking.',
+    prepayLabel:'Prepayment on Friday and Saturday evenings', prepayHelp:'Fewer no-shows on your busiest nights.',
+    via:'Booked via', viaApp:'app', viaPhone:'phone or WhatsApp', status:'Status',
+    st_booked:'booked', st_arrived:'arrived', st_noshow:'no-show',
+    markArrived:'Mark as arrived', markNoShow:'Mark as no-show', cancelBooking:'Cancel booking',
+    addTitle:'Add a booking', addSub:'{table}, from {a}', save:'Add booking', close:'Close',
+    addNameErr:'Add a name for this booking.',
+    overlapErr:"That runs into {name}'s booking at {t}. Pick a shorter time.",
+    closeErr:'That runs past closing time ({t}). Pick a shorter time.',
+    fewer:'Fewer', more:'More'
+  },
+  nl: {
+    demo:'Conceptdemo', tabPlayer:'Tafel boeken', tabVenue:'Overzicht zaak',
+    openToday:'Vandaag open {a}–{b}', priceLine:'{a} per uur, studenten {c}. {b} vóór 17:00 en op zondag.',
+    pool:'Pool', snooker:'Snooker', nTables:'{n} tafels',
+    when:'Wanneer', today:'Vandaag', howLong:'Hoe lang', h1:'1 uur', h15:'1½ uur', h2:'2 uur',
+    pickTime:'Kies een tijd', free:'{n} vrij', full:'Vol', noTimes:'Vandaag geen tijden meer. Kies een andere dag.',
+    pickTable:'Kies een tafel', poolTable:'Pooltafel {n}', snookerTable:'Snookertafel {n}',
+    tFree:'Vrij', taken:'Bezet', walkin:'Inloop', yours:'Jouw tafel',
+    heldNote:'{n} pooltafels blijven vrij voor inloop.', heldNote1:'1 pooltafel blijft vrij voor inloop.',
+    book:'Tafel boeken',
+    hubTitle:'Hier vol?', hubBody:'Volgende stap: vrije tafels bij andere poolcafés in Delft zien, in dezelfde app.',
+    footer:'Conceptdemo. Niet gekoppeld aan de echte reserveringen van Poolcafé de Peper, dus niets wat je hier boekt is echt. Prijzen komen uit openbare info en kunnen verouderd zijn.',
+    yourName:'Je naam', name:'Naam', namePh:'bijv. Sanne', nameErr:'Vul je naam in, dan weet de bar wie er komt.',
+    phone:'Telefoonnummer, voor een herinnering per sms', players:'Spelers', student:'Ik ben student en laat mijn pas zien aan de bar',
+    payment:'Betalen', payBar:'Aan de bar betalen', payNow:'Vooraf betalen met iDEAL',
+    prepayReq:'Op vrijdag- en zaterdagavond vraagt deze bar om vooraf te betalen.', total:'Totaal',
+    headline:'{table} is voor jou', playersN:'{n} spelers', paidBar:'betalen aan de bar', paidNow:'vooraf betaald',
+    reminder:'Je krijgt 2 uur van tevoren een sms. Kun je toch niet? Annuleer in de app, dan kan iemand anders spelen.',
+    demoNote:'Dit is een demo, er is dus geen echte tafel geboekt.',
+    seeVenue:'Bekijk het in het overzicht', done:'Klaar',
+    vTitle:'Reserveringen', vSum:'{n} reserveringen voor {p} spelers.', vSum1:'1 reservering voor {p} spelers.',
+    vApp:'{a} via de app, de rest via telefoon of WhatsApp.', vApp1:'1 via de app, de rest via telefoon of WhatsApp.',
+    vEmpty:'Nog geen reserveringen.',
+    tapHint:'Tik op een lege plek in een rij om een telefoon- of WhatsApp-reservering toe te voegen.',
+    lgBooked:'Geboekt', lgArrived:'Binnen', lgNoshow:'Niet gekomen', lgNew:'Nieuw via de app',
+    settings:'Instellingen', holdLabel:'Pooltafels vrijhouden voor inloop', holdHelp:'Deze tafels zijn nooit online te boeken.',
+    prepayLabel:'Vooraf betalen op vrijdag- en zaterdagavond', prepayHelp:'Minder no-shows op je drukste avonden.',
+    via:'Geboekt via', viaApp:'app', viaPhone:'telefoon of WhatsApp', status:'Status',
+    st_booked:'geboekt', st_arrived:'binnen', st_noshow:'niet gekomen',
+    markArrived:'Markeer als binnen', markNoShow:'Markeer als niet gekomen', cancelBooking:'Reservering annuleren',
+    addTitle:'Reservering toevoegen', addSub:'{table}, vanaf {a}', save:'Reservering toevoegen', close:'Sluiten',
+    addNameErr:'Vul een naam in voor deze reservering.',
+    overlapErr:'Dat loopt door in de reservering van {name} om {t}. Kies een kortere tijd.',
+    closeErr:'Dat loopt door na sluitingstijd ({t}). Kies een kortere tijd.',
+    fewer:'Minder', more:'Meer'
+  }
+};
+
+/* ---------- Data: Poolcafé de Peper, Peperstraat 13, Delft ---------- */
+const TABLES = [
+  {id:'S1',type:'snooker',n:1},{id:'S2',type:'snooker',n:2},
+  {id:'P1',type:'pool',n:1},{id:'P2',type:'pool',n:2},{id:'P3',type:'pool',n:3},
+  {id:'P4',type:'pool',n:4},{id:'P5',type:'pool',n:5},{id:'P6',type:'pool',n:6}
+];
+// Minutes from midnight; values past 1440 run into the next night. Index = getDay() (Sun = 0).
+const HOURS = [[1020,1440],[1020,1500],[1020,1500],[1020,1500],[1020,1500],[840,1560],[840,1560]];
+let HW = 64;    // px per hour on the venue timeline; stretches to fill wide screens
+const NW = 92;  // px for the table-name column
+
+const S = {
+  lang:'en', view:'player',
+  game:'pool', dayIdx:0, dur:60, slot:null, table:null,
+  vDayIdx:0, holdBack:2, prepayWeekend:false,
+  bookings:[], sheet:null, form:{name:'',phone:'',players:2,student:false,pay:'bar',err:false},
+  focusB:null, tlDay:null
+};
+let BID = 1;
+
+const DAYS = (() => { const out=[], d0=new Date(); d0.setHours(0,0,0,0);
+  for (let i=0;i<7;i++){ const d=new Date(d0); d.setDate(d0.getDate()+i); out.push(d); } return out; })();
+
+/* ---------- Helpers ---------- */
+const t = (k, v={}) => String(I18N[S.lang][k] ?? I18N.en[k] ?? k).replace(/\{(\w+)\}/g, (_,x) => v[x] ?? '');
+const LOC = () => S.lang==='nl' ? 'nl-NL' : 'en-GB';
+const money = x => new Intl.NumberFormat(LOC(),{style:'currency',currency:'EUR'}).format(x);
+const fmt = (d,o) => new Intl.DateTimeFormat(LOC(),o).format(d);
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+const hm = m => String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const key = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const hours = d => HOURS[d.getDay()];
+const nowMin = () => { const n=new Date(); return n.getHours()*60+n.getMinutes(); };
+const tb = id => TABLES.find(x => x.id===id);
+const findB = id => S.bookings.find(b => b.id===id);
+const active = b => b.status!=='cancelled';
+const tblName = x => t(x.type==='pool'?'poolTable':'snookerTable',{n:x.n});
+const tblShort = x => (x.type==='pool'?'Pool ':'Snooker ')+x.n;
+const durLabel = m => m===60?t('h1'):m===90?t('h15'):t('h2');
+const dayShort = d => fmt(d,{weekday:'short',day:'numeric',month:'short'});
+const dayLong = d => cap(fmt(d,{weekday:'long',day:'numeric',month:'long'}));
+const rate = (d,m,student) => (d.getDay()===0 || m<1020) ? 7.2 : (student ? 8.4 : 9.6);
+const prepayReq = (d,m) => S.prepayWeekend && (d.getDay()===5 || d.getDay()===6) && m>=1020;
+const isHeld = x => x.type==='pool' && x.n > 6 - S.holdBack;
+const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function tableFree(k, id, s, e, ignore){
+  return !S.bookings.some(b => b.date===k && b.table===id && active(b) && b.id!==ignore && b.start<e && s<b.start+b.dur);
+}
+function freeList(k, type, s, dur){
+  return TABLES.filter(x => x.type===type && !isHeld(x) && tableFree(k,x.id,s,s+dur));
+}
+
+/* ---------- Seed believable bookings (busy Friday and Saturday nights) ---------- */
+function hash(str){ let h=2166136261; for (const c of str){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+function rng(seed){ return () => { seed|=0; seed=seed+0x6D2B79F5|0; let x=Math.imul(seed^seed>>>15,1|seed); x=x+Math.imul(x^x>>>7,61|x)^x; return ((x^x>>>14)>>>0)/4294967296; }; }
+const NAMES = ['Daan','Sanne','Mehmet','Lotte','Jesse','Priya','Bram','Femke','Ahmet','Noor','Ruben','Yara','Lucas','Isa','Thijs','Elif','Max','Fleur','Omar','Julia','Sem','Zeynep','Milan','Anouk','Wouter','Mila'];
+const INIT = 'ABDGHJKMPSTVW';
+function busy(dow, m){
+  const wk = dow===5 || dow===6;
+  if (m < 1020) return wk ? .3 : .1;
+  if (m < 1140) return wk ? .6 : dow===4 ? .35 : .22;
+  if (m < 1380) return wk ? .85 : dow===4 ? .6 : dow===0 ? .3 : .4;
+  return wk ? .55 : .2;
+}
+function seed(){
+  DAYS.forEach(d => {
+    const k=key(d), [o,c]=hours(d), dow=d.getDay();
+    TABLES.forEach(x => {
+      if (x.type==='pool' && x.n>4) return;           // tables 5 and 6 start as walk-in tables
+      const r = rng(hash(k+x.id));
+      let m = o + (r()<.5 ? 0 : 30);
+      while (m <= c-60){
+        if (r() < busy(dow,m)){
+          const dur = [60,60,90,120][Math.floor(r()*4)];
+          if (m+dur > c){ m+=30; continue; }
+          S.bookings.push({ id:BID++, date:k, table:x.id, start:m, dur,
+            name: NAMES[Math.floor(r()*NAMES.length)]+' '+INIT[Math.floor(r()*INIT.length)]+'.',
+            players: x.type==='snooker' ? 2 : [2,2,3,4][Math.floor(r()*4)],
+            source: r()<.6 ? 'app' : 'phone', status:'booked', isNew:false, paid:false });
+          m += dur; if (r()<.25) m += 30;
+        } else m += 30;
+      }
+    });
+  });
+}
+
+/* ---------- Pieces ---------- */
+const LOGO = '<svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#fff" stroke="#15211B" stroke-width="2"/><circle cx="20.5" cy="11" r="3.4" fill="#2B66AE"/></svg>';
+
+function tableSVG(x){
+  const sn = x.type==='snooker', W = sn?320:180, H = sn?160:100, r = sn?15:12, pr = sn?6.5:7.5;
+  const iw=W-2*r, ih=H-2*r, gid='g'+x.id;
+  const pk=[[r,r],[W/2,r-1.5],[W-r,r],[r,H-r],[W/2,H-r+1.5],[W-r,H-r]];
+  const marks = sn
+    ? `<line x1="${r+iw*.22}" y1="${r}" x2="${r+iw*.22}" y2="${H-r}" stroke="rgba(255,255,255,.35)" stroke-width="1.2"/>`
+    : `<circle cx="${r+iw*.25}" cy="${H/2}" r="2" fill="rgba(255,255,255,.55)"/><circle cx="${r+iw*.75}" cy="${H/2}" r="2" fill="rgba(255,255,255,.55)"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs><radialGradient id="${gid}" cx="50%" cy="42%" r="65%"><stop offset="0" stop-color="#1F8E66"/><stop offset=".6" stop-color="#0F6B4C"/><stop offset="1" stop-color="#0A4C36"/></radialGradient></defs>
+    <rect width="${W}" height="${H}" rx="${r}" fill="#6A4127"/>
+    <rect x="${r}" y="${r}" width="${iw}" height="${ih}" rx="3" fill="url(#${gid})"/>${marks}
+    ${pk.map(([a,b]) => `<circle cx="${a}" cy="${b}" r="${pr}" fill="#0D0D0D"/>`).join('')}
+    <text class="tb-n" x="${W/2}" y="${H/2}" text-anchor="middle" dominant-baseline="central">${x.n}</text></svg>`;
+}
+
+function chip(a,v,on,label){ return `<button class="chip" data-a="${a}" data-v="${v}" aria-pressed="${on}">${label}</button>`; }
+
+function dayStrip(a, cur){
+  return `<div class="days">${DAYS.map((d,i) => `<button class="day" data-a="${a}" data-v="${i}" aria-pressed="${i===cur}"><small>${i===0?t('today'):fmt(d,{weekday:'short'}).replace('.','')}</small><b>${d.getDate()}</b></button>`).join('')}</div>`;
+}
+
+function header(){
+  return `<header class="top">
+    <div class="brand">${LOGO}<span class="word">Keu</span><span class="demo">${t('demo')}</span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-a="lang" data-v="en" aria-pressed="${S.lang==='en'}">EN</button>
+      <button data-a="lang" data-v="nl" aria-pressed="${S.lang==='nl'}">NL</button>
+    </div></header>
+    <nav class="views">
+      <button data-a="view" data-v="player" aria-pressed="${S.view==='player'}">${t('tabPlayer')}</button>
+      <button data-a="view" data-v="venue" aria-pressed="${S.view==='venue'}">${t('tabVenue')}</button>
+    </nav>`;
+}
+
+/* ---------- Player view ---------- */
+function tableBtn(x, k){
+  const st = isHeld(x) ? 'held' : !tableFree(k,x.id,S.slot,S.slot+S.dur) ? 'taken' : x.id===S.table ? 'sel' : 'free';
+  const label = {held:t('walkin'), taken:t('taken'), sel:t('yours'), free:t('tFree')}[st];
+  const ok = st==='free' || st==='sel';
+  return `<button class="tb ${x.type} ${st}" data-a="table" data-id="${x.id}" ${ok?'':'disabled'} aria-pressed="${st==='sel'}" aria-label="${esc(tblName(x))}: ${esc(label)}">${tableSVG(x)}<span class="tb-l">${label}</span></button>`;
+}
+
+function renderPlayer(){
+  const d=DAYS[S.dayIdx], k=key(d), [o,c]=hours(d), [to,tc]=hours(DAYS[0]);
+  const nm = S.dayIdx===0 ? nowMin() : -1;
+  const slots=[];
+  for (let m=o; m+S.dur<=c; m+=30){ if (m<=nm) continue; slots.push({m, f:freeList(k,S.game,m,S.dur).length}); }
+  if (S.slot!=null && !slots.some(s => s.m===S.slot && s.f>0)){ S.slot=null; S.table=null; }
+  if (S.slot!=null){ const fl=freeList(k,S.game,S.slot,S.dur); if (!fl.some(x => x.id===S.table)) S.table=fl[0].id; }
+
+  let h = `<section class="venue felt">
+      <h1>Poolcafé de Peper</h1>
+      <p>Peperstraat 13, Delft</p>
+      <p>${t('openToday',{a:hm(to),b:hm(tc)})}</p>
+      <p class="price">${t('priceLine',{a:money(9.6),b:money(7.2),c:money(8.4)})}</p>
+    </section>
+    <div class="game">${['pool','snooker'].map(g => `<button class="opt" data-a="game" data-v="${g}" aria-pressed="${S.game===g}"><strong>${t(g)}</strong><small>${t('nTables',{n:TABLES.filter(x=>x.type===g).length})}</small></button>`).join('')}</div>
+    <section class="blk"><h2>${t('when')}</h2>${dayStrip('day',S.dayIdx)}</section>
+    <section class="blk"><h2>${t('howLong')}</h2><div class="chips">${[60,90,120].map(m => chip('dur',m,S.dur===m,durLabel(m))).join('')}</div></section>
+    <section class="blk"><h2>${t('pickTime')}</h2>${slots.length
+      ? `<div class="times">${slots.map(s => `<button class="time" data-a="slot" data-v="${s.m}" ${s.f?'':'disabled'} aria-pressed="${s.m===S.slot}"><b>${hm(s.m)}</b><small>${s.f?t('free',{n:s.f}):t('full')}</small></button>`).join('')}</div>`
+      : `<p class="muted">${t('noTimes')}</p>`}</section>`;
+
+  if (S.slot!=null){
+    h += `<section class="blk" id="floor"><h2>${t('pickTable')}</h2>
+      <div class="floor ${S.game}">${TABLES.filter(x => x.type===S.game).map(x => tableBtn(x,k)).join('')}</div>
+      ${S.game==='pool' && S.holdBack ? `<p class="note">${t(S.holdBack===1?'heldNote1':'heldNote',{n:S.holdBack})}</p>` : ''}</section>`;
+  }
+  h += `<aside class="hub"><strong>${t('hubTitle')}</strong>${t('hubBody')}</aside><p class="foot">${t('footer')}</p>`;
+  return h;
+}
+
+function renderBar(){
+  const bar=document.getElementById('bar');
+  const show = S.view==='player' && S.slot!=null && !!S.table;
+  bar.hidden=!show; document.body.classList.toggle('has-bar',show);
+  if (!show){ bar.innerHTML=''; return; }
+  const d=DAYS[S.dayIdx], x=tb(S.table);
+  bar.innerHTML = `<div class="bar-in"><div class="bar-txt"><strong>${tblName(x)}</strong><span>${dayShort(d)}, ${hm(S.slot)}–${hm(S.slot+S.dur)}</span></div>
+    <div class="bar-r"><span class="bar-p">${money(rate(d,S.slot,false)*S.dur/60)}</span><button class="btn" data-a="openBook">${t('book')}</button></div></div>`;
+}
+
+/* ---------- Venue view ---------- */
+function renderVenue(){
+  const d=DAYS[S.vDayIdx], k=key(d), [o,c]=hours(d);
+  const avail = Math.min(1000, document.documentElement.clientWidth) - 34 - NW;
+  HW = Math.max(64, avail / ((c-o)/60));
+  const W=(c-o)/60*HW;
+  const day=S.bookings.filter(b => b.date===k && active(b));
+  const n=day.length, p=day.reduce((s,b) => s+b.players,0), a=day.filter(b => b.source==='app').length;
+  const sum = n ? t(n===1?'vSum1':'vSum',{n,p})+' '+t(a===1?'vApp1':'vApp',{a}) : t('vEmpty');
+  let hrs=''; for (let m=Math.ceil(o/60)*60; m<c; m+=60) hrs += `<span style="left:${(m-o)/60*HW}px">${hm(m)}</span>`;
+  const rows = TABLES.map(x => {
+    const held=isHeld(x);
+    const bl = day.filter(b => b.table===x.id).map(b =>
+      `<button class="bk ${b.status}${b.isNew?' new':''}" data-a="block" data-id="${b.id}" style="left:${(b.start-o)/60*HW+2}px;width:${b.dur/60*HW-4}px" aria-label="${esc(b.name)}, ${hm(b.start)}–${hm(b.start+b.dur)}"><span>${esc(b.name)}</span><small>${b.players}p</small></button>`).join('');
+    return `<div class="tl-row${held?' held':''}"><div class="tl-name">${tblShort(x)}</div><div class="tl-track" data-a="track" data-t="${x.id}" style="width:${W}px">${held?`<span class="held-l">${t('walkin')}</span>`:''}${bl}</div></div>`;
+  }).join('');
+  let now=''; if (S.vDayIdx===0){ const m=nowMin(); if (m>=o && m<=c) now=`<div class="nowline" style="left:${NW+(m-o)/60*HW}px"></div>`; }
+  const sw = (bg,bd,l) => `<span><i class="sw" style="background:${bg};border-color:${bd}"></i>${l}</span>`;
+  return `<div class="vhead"><h1>${t('vTitle')}</h1><p class="muted vdate">${dayLong(d)}, ${hm(o)}–${hm(c)}</p></div>
+    ${dayStrip('vday',S.vDayIdx)}
+    <p class="summary">${sum}</p>
+    <div class="tl-card"><div class="tl-scroll"><div class="tl-inner" style="width:${NW+W}px;--hw:${HW}px;--nw:${NW}px">
+      <div class="tl-head"><div class="tl-name"></div><div class="tl-hours" style="width:${W}px">${hrs}</div></div>
+      ${rows}${now}
+    </div></div></div>
+    <div class="legend">${sw('var(--chalk-tint)','var(--chalk)',t('lgBooked'))}${sw('var(--green-tint)','var(--cloth)',t('lgArrived'))}${sw('var(--red-tint)','var(--red)',t('lgNoshow'))}${sw('var(--ball-tint)','var(--ball)',t('lgNew'))}</div>
+    <p class="note">${t('tapHint')}</p>
+    <section class="card">
+      <h2>${t('settings')}</h2>
+      <div class="set"><div><strong>${t('holdLabel')}</strong><p>${t('holdHelp')}</p></div>
+        <div class="stepper"><button data-a="hold" data-v="-1" aria-label="${t('fewer')}" ${S.holdBack<=0?'disabled':''}>−</button><span aria-live="polite">${S.holdBack}</span><button data-a="hold" data-v="1" aria-label="${t('more')}" ${S.holdBack>=4?'disabled':''}>+</button></div></div>
+      <div class="set"><div><strong>${t('prepayLabel')}</strong><p>${t('prepayHelp')}</p></div>
+        <button class="switch" role="switch" aria-checked="${S.prepayWeekend}" aria-label="${t('prepayLabel')}" data-a="prepay"><span></span></button></div>
+    </section>
+    <p class="foot">${t('footer')}</p>`;
+}
+
+/* ---------- Sheets ---------- */
+function sheetBook(){
+  const d=DAYS[S.dayIdx], x=tb(S.table), F=S.form, req=prepayReq(d,S.slot);
+  if (req) F.pay='now';
+  const total = rate(d,S.slot,F.student)*S.dur/60;
+  const counts = x.type==='snooker' ? [2,3,4] : [2,3,4,5,6];
+  return `<h2 class="sh-t">${tblName(x)}</h2>
+    <p class="sh-sub">${dayLong(d)}, ${hm(S.slot)}–${hm(S.slot+S.dur)}</p>
+    <label class="fld"><span>${t('yourName')}</span><input id="f-name" value="${esc(F.name)}" placeholder="${t('namePh')}" autocomplete="name">${F.err?`<em class="err">${t('nameErr')}</em>`:''}</label>
+    <label class="fld"><span>${t('phone')}</span><input id="f-phone" type="tel" inputmode="tel" value="${esc(F.phone)}" placeholder="06 12345678" autocomplete="tel"></label>
+    <div class="fld"><span>${t('players')}</span><div class="chips">${counts.map(n => chip('players',n,F.players===n,n)).join('')}</div></div>
+    <label class="check"><input type="checkbox" id="f-student" ${F.student?'checked':''}><span>${t('student')}</span></label>
+    <div class="fld"><span>${t('payment')}</span><div class="pay">
+      <button class="opt" data-a="pay" data-v="bar" aria-pressed="${F.pay==='bar'}" ${req?'disabled':''}>${t('payBar')}</button>
+      <button class="opt" data-a="pay" data-v="now" aria-pressed="${F.pay==='now'}">${t('payNow')}</button></div>
+      ${req?`<p class="note">${t('prepayReq')}</p>`:''}</div>
+    <div class="sh-foot"><div><small>${t('total')}</small><strong>${money(total)}</strong></div><button class="btn" data-a="confirmBook">${t('book')}</button></div>`;
+}
+
+function sheetDone(b){
+  const x=tb(b.table), d=DAYS.find(z => key(z)===b.date);
+  return `<div class="ticket"><div class="felt"><span class="ticket-n">${x.n}</span><span class="ticket-type">${t(x.type)}</span></div>
+      <div class="ticket-body"><h2>${t('headline',{table:tblName(x)})}</h2>
+      <p>${dayLong(d)}, ${hm(b.start)}–${hm(b.start+b.dur)}<br>${t('playersN',{n:b.players})}, ${b.paid?t('paidNow'):t('paidBar')}</p></div></div>
+    <p class="note">${t('reminder')}</p>
+    <p class="note">${t('demoNote')}</p>
+    <div class="sh-actions"><button class="btn" data-a="seeVenue" data-id="${b.id}">${t('seeVenue')}</button><button class="btn ghost" data-a="closeSheet">${t('done')}</button></div>`;
+}
+
+function sheetDetail(b){
+  const x=tb(b.table);
+  return `<h2 class="sh-t">${esc(b.name)}</h2>
+    <p class="sh-sub">${tblShort(x)}, ${hm(b.start)}–${hm(b.start+b.dur)}</p>
+    <dl class="dl">
+      <div><dt>${t('players')}</dt><dd>${b.players}</dd></div>
+      <div><dt>${t('status')}</dt><dd>${t('st_'+b.status)}</dd></div>
+      <div><dt>${t('via')}</dt><dd>${b.source==='app'?t('viaApp'):t('viaPhone')}</dd></div>
+      ${b.source==='app'?`<div><dt>${t('payment')}</dt><dd>${b.paid?t('paidNow'):t('paidBar')}</dd></div>`:''}
+    </dl>
+    <div class="sh-actions col">
+      <button class="btn green" data-a="status" data-v="arrived" data-id="${b.id}">${t('markArrived')}</button>
+      <button class="btn ghost" data-a="status" data-v="noshow" data-id="${b.id}">${t('markNoShow')}</button>
+      <button class="btn danger" data-a="status" data-v="cancelled" data-id="${b.id}">${t('cancelBooking')}</button>
+    </div>`;
+}
+
+function sheetAdd(A){
+  const x=tb(A.table);
+  return `<h2 class="sh-t">${t('addTitle')}</h2>
+    <p class="sh-sub">${t('addSub',{table:tblShort(x),a:hm(A.start)})}</p>
+    <label class="fld"><span>${t('name')}</span><input id="a-name" value="${esc(A.name)}" placeholder="${t('namePh')}"></label>
+    <div class="fld"><span>${t('howLong')}</span><div class="chips">${[60,90,120].map(m => chip('addDur',m,A.dur===m,durLabel(m))).join('')}</div></div>
+    <div class="fld"><span>${t('players')}</span><div class="chips">${[2,3,4,5,6].map(n => chip('addPlayers',n,A.players===n,n)).join('')}</div></div>
+    ${A.err?`<p class="err">${esc(A.err)}</p>`:''}
+    <div class="sh-actions"><button class="btn" data-a="saveAdd">${t('save')}</button><button class="btn ghost" data-a="closeSheet">${t('close')}</button></div>`;
+}
+
+function renderSheet(){
+  const host=document.getElementById('sheet');
+  if (!S.sheet){ host.innerHTML=''; host.hidden=true; document.body.classList.remove('locked'); return; }
+  const s=S.sheet;
+  const inner = s.type==='book' ? sheetBook() : s.type==='done' ? sheetDone(findB(s.id)) : s.type==='detail' ? sheetDetail(findB(s.id)) : sheetAdd(s);
+  const fresh = host.hidden;
+  host.hidden=false;
+  host.innerHTML = `<div class="scrim" data-a="closeSheet"></div><div class="panel${fresh?' anim':''}" role="dialog" aria-modal="true"><div class="grab"></div>${inner}</div>`;
+  document.body.classList.add('locked');
+}
+
+/* ---------- Render ---------- */
+function render(){
+  document.documentElement.lang = S.lang;
+  const sc=document.querySelector('.tl-scroll'), prevSL = sc ? sc.scrollLeft : null, prevDay = sc ? S.tlDay : null;
+  document.getElementById('app').innerHTML = `<div class="wrap${S.view==='venue'?' wide':''}">${header()}${S.view==='player'?renderPlayer():renderVenue()}</div>`;
+  renderBar();
+  document.querySelectorAll('.days').forEach(st => {
+    const on = st.querySelector('[aria-pressed="true"]');
+    if (on && (on.offsetLeft + on.offsetWidth > st.scrollLeft + st.clientWidth || on.offsetLeft < st.scrollLeft))
+      st.scrollLeft = on.offsetLeft - st.clientWidth/2 + on.offsetWidth/2;
+  });
+  const sc2=document.querySelector('.tl-scroll');
+  if (sc2){
+    const d=DAYS[S.vDayIdx], [o,c]=hours(d);
+    if (S.focusB){ const b=findB(S.focusB); sc2.scrollLeft=Math.max(0,(b.start-o)/60*HW-40); S.focusB=null; }
+    else if (prevSL!=null && prevDay===S.vDayIdx) sc2.scrollLeft=prevSL;
+    else { let m = S.vDayIdx===0 ? nowMin() : 1140; if (m<o || m>c) m=1140; sc2.scrollLeft=Math.max(0,(m-o)/60*HW-60); }
+    S.tlDay=S.vDayIdx;
+  }
+  renderSheet();
+}
+
+function closeSheet(){ S.sheet=null; render(); }
+
+function confirmBook(){
+  const F=S.form;
+  if (!F.name.trim()){ F.err=true; renderSheet(); document.getElementById('f-name')?.focus(); return; }
+  const d=DAYS[S.dayIdx], k=key(d);
+  if (!tableFree(k,S.table,S.slot,S.slot+S.dur)){ S.sheet=null; render(); return; }
+  const b={ id:BID++, date:k, table:S.table, start:S.slot, dur:S.dur, name:F.name.trim(), players:F.players,
+    source:'app', status:'booked', isNew:true, paid: prepayReq(d,S.slot) || F.pay==='now' };
+  S.bookings.push(b);
+  S.slot=null; S.table=null; S.sheet={type:'done', id:b.id};
+  render(); window.scrollTo(0,0);
+}
+
+function openAdd(el, e){
+  const d=DAYS[S.vDayIdx], k=key(d), [o,c]=hours(d);
+  const x = e.clientX - el.getBoundingClientRect().left;
+  let m = o + Math.floor(x/HW*2)*30;
+  m = Math.max(o, Math.min(m, c-60));
+  if (!tableFree(k, el.dataset.t, m, m+30)) return;
+  S.sheet={type:'add', table:el.dataset.t, start:m, dur:60, players:2, name:'', err:''};
+  renderSheet();
+  setTimeout(() => document.getElementById('a-name')?.focus(), 60);
+}
+
+function saveAdd(){
+  const A=S.sheet, d=DAYS[S.vDayIdx], k=key(d), [,c]=hours(d), end=A.start+A.dur;
+  if (!A.name.trim()){ A.err=t('addNameErr'); renderSheet(); return; }
+  if (end>c){ A.err=t('closeErr',{t:hm(c)}); renderSheet(); return; }
+  const clash = S.bookings.filter(b => b.date===k && b.table===A.table && active(b) && b.start<end && A.start<b.start+b.dur).sort((a,b) => a.start-b.start)[0];
+  if (clash){ A.err=t('overlapErr',{name:clash.name,t:hm(clash.start)}); renderSheet(); return; }
+  S.bookings.push({ id:BID++, date:k, table:A.table, start:A.start, dur:A.dur, name:A.name.trim(), players:A.players, source:'phone', status:'booked', isNew:false, paid:false });
+  closeSheet();
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]');
+  if (!el || el.disabled) return;
+  const a=el.dataset.a, v=el.dataset.v;
+  switch (a){
+    case 'view': S.view=v; S.sheet=null; render(); window.scrollTo(0,0); break;
+    case 'lang': S.lang=v; render(); break;
+    case 'game': S.game=v; S.slot=null; S.table=null; render(); break;
+    case 'day': S.dayIdx=+v; S.slot=null; S.table=null; render(); break;
+    case 'dur': S.dur=+v; render(); break;
+    case 'slot': {
+      S.slot=+v; S.table=null; render();
+      const f=document.getElementById('floor');
+      if (f && f.getBoundingClientRect().bottom > innerHeight-90) f.scrollIntoView({behavior:reduced()?'auto':'smooth', block:'center'});
+      break;
+    }
+    case 'table': S.table=el.dataset.id; render(); break;
+    case 'openBook': S.form={name:S.form.name, phone:S.form.phone, players:2, student:false, pay:'bar', err:false}; S.sheet={type:'book'}; renderSheet(); break;
+    case 'players': S.form.players=+v; renderSheet(); break;
+    case 'pay': S.form.pay=v; renderSheet(); break;
+    case 'confirmBook': confirmBook(); break;
+    case 'closeSheet': closeSheet(); break;
+    case 'seeVenue': { const b=findB(+el.dataset.id); S.sheet=null; S.view='venue'; S.vDayIdx=DAYS.findIndex(d => key(d)===b.date); S.focusB=b.id; render(); window.scrollTo(0,0); break; }
+    case 'vday': S.vDayIdx=+v; render(); break;
+    case 'block': S.sheet={type:'detail', id:+el.dataset.id}; renderSheet(); break;
+    case 'status': { const b=findB(+el.dataset.id); b.status=v; b.isNew=false; closeSheet(); break; }
+    case 'track': openAdd(el, e); break;
+    case 'hold': S.holdBack=Math.max(0, Math.min(4, S.holdBack + +v)); render(); break;
+    case 'prepay': S.prepayWeekend=!S.prepayWeekend; render(); break;
+    case 'addDur': S.sheet.dur=+v; S.sheet.err=''; renderSheet(); break;
+    case 'addPlayers': S.sheet.players=+v; renderSheet(); break;
+    case 'saveAdd': saveAdd(); break;
+  }
+});
+document.addEventListener('input', e => {
+  const id=e.target.id;
+  if (id==='f-name'){ S.form.name=e.target.value; if (S.form.err){ S.form.err=false; e.target.parentElement.querySelector('.err')?.remove(); } }
+  else if (id==='f-phone') S.form.phone=e.target.value;
+  else if (id==='a-name' && S.sheet) S.sheet.name=e.target.value;
+});
+document.addEventListener('change', e => { if (e.target.id==='f-student'){ S.form.student=e.target.checked; renderSheet(); } });
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape' && S.sheet) closeSheet();
+  if (e.key==='Enter' && S.sheet && e.target.tagName==='INPUT'){ if (S.sheet.type==='book') confirmBook(); else if (S.sheet.type==='add') saveAdd(); }
+});
+
+let rz; window.addEventListener('resize', () => { if (S.view!=='venue') return; clearTimeout(rz); rz=setTimeout(render,150); });
+
+seed();
+render();
+</script>
+</body>
+</html>
