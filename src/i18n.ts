@@ -44,6 +44,8 @@ const en = {
   netErr:'Something went wrong. Check your connection and try again.',
   takenErr:'Someone just booked this table. Close this and pick another time or table.',
   payLater:"Online payment isn't live yet, so you'll pay at the bar.",
+  closedDay:'Closed this day.', phoneShort:'Phone',
+  overlapAny:'That runs into another booking. Pick a shorter time.',
 }
 
 type Key = keyof typeof en
@@ -87,6 +89,8 @@ const nl: Record<Key, string> = {
   netErr:'Er ging iets mis. Controleer je verbinding en probeer het opnieuw.',
   takenErr:'Iemand heeft deze tafel net geboekt. Sluit dit en kies een andere tijd of tafel.',
   payLater:'Online betalen werkt nog niet, je betaalt aan de bar.',
+  closedDay:'Op deze dag gesloten.', phoneShort:'Telefoon',
+  overlapAny:'Dat loopt door in een andere reservering. Kies een kortere tijd.',
 }
 
 const STRINGS: Record<Lang, Record<Key, string>> = { en, nl }
