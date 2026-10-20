@@ -157,7 +157,6 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
         </section>
       )}
 
-      <aside className="hub"><strong>{t('hubTitle')}</strong>{t('hubBody')}</aside>
       <p className="foot">{t('footer', { venue: venue.name })}</p>
 
       {barTable && slot != null && (
