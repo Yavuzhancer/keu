@@ -8,7 +8,7 @@
 
 do $$
 declare
-  v_id   uuid := (select id from public.venues where slug = 'de-peper');
+  v_id   uuid := (select id from public.venues where slug = 'pool-and-billiards-delft');
   names  text[] := array['Daan','Sanne','Mehmet','Lotte','Jesse','Priya','Bram','Femke','Ahmet','Noor','Ruben','Yara',
                          'Lucas','Isa','Thijs','Elif','Max','Fleur','Omar','Julia','Sem','Zeynep','Milan','Anouk','Wouter','Mila'];
   inits  text := 'ABDGHJKMPSTVW';
