@@ -81,7 +81,7 @@ export function VenueView({ info, dayIdx, setDayIdx, focusId, clearFocus, reload
       <p className="note">{t('tapHint')}</p>
       <SettingsCard info={info} onSaved={reloadInfo} />
       <button className="btn ghost logout" onClick={onLogout}>{t('logout')}</button>
-      <p className="foot">{t('footer')}</p>
+      <p className="foot">{t('footer', { venue: venue.name })}</p>
 
       {sheet && (
         <Sheet onClose={() => setSheet(null)}>

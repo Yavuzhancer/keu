@@ -6,9 +6,9 @@ import { TableSvg } from '../components/TableSvg'
 import { useI18n } from '../i18n'
 import { fetchBusy } from '../lib/api'
 import { useBodyClass, useNow, usePolled } from '../lib/hooks'
-import { BOOKING_DAYS, DURATIONS, freeTables, hoursOn, rate, tableFree } from '../lib/rules'
+import { BOOKING_DAYS, DURATIONS, GAMES, freeTables, hoursOn, lastStartOn, rate, tableFree } from '../lib/rules'
 import { dayKey, hm, nextDays, nowMin, parseDay, reducedMotion } from '../lib/time'
-import type { Booking, Busy, Table, VenueInfo } from '../lib/types'
+import type { Booking, Busy, GameType, Table, VenueInfo } from '../lib/types'
 import { BookSheet } from './BookSheet'
 import { DoneSheet } from './DoneSheet'
 import type { Contact, Pick, PlayerSel } from './state'
@@ -24,6 +24,7 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
   onSeeVenue: (b: Booking) => void
 }) {
   const { t, money, durLabel, tableName, dayShort } = useI18n()
+  const games = GAMES.filter(g => info.tables.some(x => x.type === g))
   const { venue, tables } = info
   const now = useNow()
   const todayKey = dayKey(now)
@@ -39,7 +40,7 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
   const nm = sel.dayIdx === 0 ? nowMin(now) : -1
   const slots: { m: number; f: number }[] = []
   if (h && busy) {
-    for (let m = h[0]; m + sel.dur <= h[1]; m += 30) {
+    for (let m = h[0]; m <= lastStartOn(info, h[1], sel.dur); m += 30) {
       if (m <= nm) continue
       slots.push({ m, f: freeTables(tables, busy, k, sel.game, m, sel.dur).length })
     }
@@ -67,7 +68,25 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
   useBodyClass('has-bar', !!barTable)
 
   const held = tables.filter(x => x.type === 'pool' && x.walkIn).length
-  const price = (cents: number) => money(cents / 100)
+  // Show the online cutoff only on days when it actually cuts times off.
+  const cutoff = info.settings.lastStart
+  const showCutoff = h != null && cutoff != null && cutoff < h[1] - 60
+
+  // "€17.50 per hour for pool and snooker, €10.00 for billiards." Types with the same price share a phrase.
+  const groups: { cents: number; types: GameType[] }[] = []
+  for (const g of games) {
+    const cents = info.rates[g] ?? 0
+    const same = groups.find(x => x.cents === cents)
+    if (same) same.types.push(g)
+    else groups.push({ cents, types: [g] })
+  }
+  const list = (types: GameType[]) => {
+    const names = types.map(g => t(g).toLowerCase())
+    return names.length > 1 ? names.slice(0, -1).join(', ') + ' ' + t('and') + ' ' + names[names.length - 1] : names[0]
+  }
+  const priceLine = groups.length === 1
+    ? t('priceAll', { p: money(groups[0].cents / 100) })
+    : groups.map((x, i) => t(i ? 'priceNext' : 'priceFirst', { p: money(x.cents / 100), types: list(x.types) })).join(', ') + '.'
 
   function booked(b: Booking) {
     setSel(s => ({ ...s, slot: null, table: null }))
@@ -82,13 +101,11 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
         <h1>{venue.name}</h1>
         <p>{venue.address}, {venue.city}</p>
         <p>{today ? t('openToday', { a: hm(today[0]), b: hm(today[1]) }) : t('closedToday')}</p>
-        <p className="price">
-          {t('priceLine', { a: price(venue.priceCents), b: price(venue.offPeakPriceCents), c: price(venue.studentPriceCents) })}
-        </p>
+        <p className="price">{priceLine}</p>
       </section>
 
-      <div className="game">
-        {(['pool', 'snooker'] as const).map(g => (
+      <div className={`game n${games.length}`}>
+        {games.map(g => (
           <button key={g} className="opt" aria-pressed={sel.game === g}
             onClick={() => setSel(s => ({ ...s, game: g, slot: null, table: null }))}>
             <strong>{t(g)}</strong>
@@ -124,6 +141,7 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
         ) : (
           <p className="muted">{t('noTimes')}</p>
         )}
+        {busy && showCutoff && <p className="note">{t('lastNote', { t: hm(cutoff) })}</p>}
       </section>
 
       {slot != null && busy && (
@@ -140,7 +158,7 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
       )}
 
       <aside className="hub"><strong>{t('hubTitle')}</strong>{t('hubBody')}</aside>
-      <p className="foot">{t('footer')}</p>
+      <p className="foot">{t('footer', { venue: venue.name })}</p>
 
       {barTable && slot != null && (
         <div className="bar">
@@ -150,7 +168,7 @@ export function PlayerView({ info, sel, setSel, contact, setContact, onSeeVenue 
               <span>{dayShort(d)}, {hm(slot)}–{hm(slot + sel.dur)}</span>
             </div>
             <div className="bar-r">
-              <span className="bar-p">{money(rate(venue, d, slot, false) * sel.dur / 60)}</span>
+              <span className="bar-p">{money(rate(info, barTable.type) * sel.dur / 60)}</span>
               <button className="btn" onClick={() => setSheet({ type: 'book', pick: { date: k, tableId: barTable.id, start: slot, dur: sel.dur } })}>
                 {t('book')}
               </button>

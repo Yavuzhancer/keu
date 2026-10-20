@@ -212,3 +212,6 @@ body.has-bar .wrap{padding-bottom:110px}
 .login .btn{width:100%}
 .logout{margin-top:16px}
 .set-err{margin:0 0 12px}
+.game.n3{grid-template-columns:repeat(3,1fr)}
+.game.n1{grid-template-columns:1fr}
+.stepper span.time-v{font-size:22px;width:64px}

@@ -19,15 +19,14 @@ export function BookSheet({ info, pick, contact, setContact, onBooked }: {
   const x = info.tables.find(z => z.id === pick.tableId)!
   const req = prepayRequired(info.settings, d, pick.start)
   const [players, setPlayers] = useState(2)
-  const [student, setStudent] = useState(false)
   const [pay, setPay] = useState<'bar' | 'now'>('bar')
   const [err, setErr] = useState<'name' | 'taken' | 'net' | null>(null)
   const [saving, setSaving] = useState(false)
   const nameRef = useRef<HTMLInputElement>(null)
 
   const payNow = req || pay === 'now'
-  const total = rate(info.venue, d, pick.start, student) * pick.dur / 60
-  const counts = x.type === 'snooker' ? [2, 3, 4] : [2, 3, 4, 5, 6]
+  const total = rate(info, x.type) * pick.dur / 60
+  const counts = x.type === 'pool' ? [2, 3, 4, 5, 6] : [2, 3, 4]
 
   async function confirm() {
     if (saving) return
@@ -63,10 +62,6 @@ export function BookSheet({ info, pick, contact, setContact, onBooked }: {
           onChange={e => { const phone = e.target.value; setContact(c => ({ ...c, phone })) }} />
       </label>
       <div className="fld"><span>{t('players')}</span><Chips values={counts} value={players} onPick={setPlayers} /></div>
-      <label className="check">
-        <input type="checkbox" checked={student} onChange={e => setStudent(e.target.checked)} />
-        <span>{t('student')}</span>
-      </label>
       <div className="fld">
         <span>{t('payment')}</span>
         <div className="pay">

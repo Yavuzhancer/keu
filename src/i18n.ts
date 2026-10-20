@@ -6,18 +6,18 @@ export type Lang = 'en' | 'nl'
 
 const en = {
   demo:'Concept demo', tabPlayer:'Book a table', tabVenue:'Venue view',
-  openToday:'Open today {a}–{b}', priceLine:'{a} per hour, students {c}. {b} before 17:00 and on Sundays.',
-  pool:'Pool', snooker:'Snooker', nTables:'{n} tables',
+  openToday:'Open today {a}–{b}', priceAll:'{p} per hour.', priceFirst:'{p} per hour for {types}', priceNext:'{p} for {types}', and:'and',
+  pool:'Pool', snooker:'Snooker', carom:'Billiards', nTables:'{n} tables',
   when:'When', today:'Today', howLong:'How long', h1:'1 hour', h15:'1½ hours', h2:'2 hours',
   pickTime:'Pick a time', free:'{n} free', full:'Full', noTimes:'No times left today. Pick another day.',
-  pickTable:'Pick a table', poolTable:'Pool table {n}', snookerTable:'Snooker table {n}',
+  pickTable:'Pick a table', poolTable:'Pool table {n}', snookerTable:'Snooker table {n}', caromTable:'Billiards table {n}',
   tFree:'Free', taken:'Taken', walkin:'Walk-in', yours:'Your table',
   heldNote:'{n} pool tables stay free for walk-ins.', heldNote1:'1 pool table stays free for walk-ins.',
   book:'Book table',
   hubTitle:'Full here?', hubBody:'Next step: see free tables at other pool spots in Delft, in the same app.',
-  footer:"Concept demo. It isn't connected to Poolcafé de Peper's real reservations, so nothing booked here is real. Prices come from public info and may be out of date.",
+  footer:"Concept demo. It isn't connected to {venue}'s real reservations, so nothing booked here is real. Prices and opening hours come from public info and may be out of date; table counts are an estimate.",
   yourName:'Your name', name:'Name', namePh:'e.g. Sanne', nameErr:"Add your name so the bar knows who's coming.",
-  phone:'Phone number, for a reminder text', players:'Players', student:"I'm a student and will show my card at the bar",
+  phone:'Phone number, for a reminder text', players:'Players',
   payment:'Payment', payBar:'Pay at the bar', payNow:'Prepay with iDEAL',
   prepayReq:'On Friday and Saturday evenings this bar asks you to prepay.', total:'Total',
   headline:'{table} is yours', playersN:'{n} players', paidBar:'pay at the bar', paidNow:'prepaid',
@@ -49,24 +49,27 @@ const en = {
   loginTitle:'Venue login', loginSub:'Bookings include names and phone numbers, so this part is for staff only.',
   pin:'Venue PIN or password', unlock:'Unlock', logout:'Log out',
   pinErr:"That didn't work. After 5 wrong tries, login locks for 5 minutes.",
+  lastNote:'Online booking is for start times until {t}. Later, just walk in.',
+  lastLabel:'Last start time for online bookings', lastHelp:'Later guests walk in. You can still add later bookings here.',
+  earlier:'Earlier', later:'Later',
 }
 
 type Key = keyof typeof en
 
 const nl: Record<Key, string> = {
   demo:'Conceptdemo', tabPlayer:'Tafel boeken', tabVenue:'Overzicht zaak',
-  openToday:'Vandaag open {a}–{b}', priceLine:'{a} per uur, studenten {c}. {b} vóór 17:00 en op zondag.',
-  pool:'Pool', snooker:'Snooker', nTables:'{n} tafels',
+  openToday:'Vandaag open {a}–{b}', priceAll:'{p} per uur.', priceFirst:'{p} per uur voor {types}', priceNext:'{p} voor {types}', and:'en',
+  pool:'Pool', snooker:'Snooker', carom:'Biljart', nTables:'{n} tafels',
   when:'Wanneer', today:'Vandaag', howLong:'Hoe lang', h1:'1 uur', h15:'1½ uur', h2:'2 uur',
   pickTime:'Kies een tijd', free:'{n} vrij', full:'Vol', noTimes:'Vandaag geen tijden meer. Kies een andere dag.',
-  pickTable:'Kies een tafel', poolTable:'Pooltafel {n}', snookerTable:'Snookertafel {n}',
+  pickTable:'Kies een tafel', poolTable:'Pooltafel {n}', snookerTable:'Snookertafel {n}', caromTable:'Biljarttafel {n}',
   tFree:'Vrij', taken:'Bezet', walkin:'Inloop', yours:'Jouw tafel',
   heldNote:'{n} pooltafels blijven vrij voor inloop.', heldNote1:'1 pooltafel blijft vrij voor inloop.',
   book:'Tafel boeken',
   hubTitle:'Hier vol?', hubBody:'Volgende stap: vrije tafels bij andere poolcafés in Delft zien, in dezelfde app.',
-  footer:'Conceptdemo. Niet gekoppeld aan de echte reserveringen van Poolcafé de Peper, dus niets wat je hier boekt is echt. Prijzen komen uit openbare info en kunnen verouderd zijn.',
+  footer:'Conceptdemo. Niet gekoppeld aan de echte reserveringen van {venue}, dus niets wat je hier boekt is echt. Prijzen en openingstijden komen uit openbare info en kunnen verouderd zijn; het aantal tafels is een schatting.',
   yourName:'Je naam', name:'Naam', namePh:'bijv. Sanne', nameErr:'Vul je naam in, dan weet de bar wie er komt.',
-  phone:'Telefoonnummer, voor een herinnering per sms', players:'Spelers', student:'Ik ben student en laat mijn pas zien aan de bar',
+  phone:'Telefoonnummer, voor een herinnering per sms', players:'Spelers',
   payment:'Betalen', payBar:'Aan de bar betalen', payNow:'Vooraf betalen met iDEAL',
   prepayReq:'Op vrijdag- en zaterdagavond vraagt deze bar om vooraf te betalen.', total:'Totaal',
   headline:'{table} is voor jou', playersN:'{n} spelers', paidBar:'betalen aan de bar', paidNow:'vooraf betaald',
@@ -97,6 +100,9 @@ const nl: Record<Key, string> = {
   loginTitle:'Inloggen zaak', loginSub:'Reserveringen bevatten namen en telefoonnummers, dus dit deel is alleen voor personeel.',
   pin:'Pincode of wachtwoord van de zaak', unlock:'Ontgrendelen', logout:'Uitloggen',
   pinErr:'Dat klopt niet. Na 5 foute pogingen is inloggen 5 minuten geblokkeerd.',
+  lastNote:'Online reserveren kan voor starttijden tot en met {t}. Daarna loop je gewoon binnen.',
+  lastLabel:'Laatste starttijd voor online reserveren', lastHelp:'Wie later komt, loopt binnen. Latere reserveringen kun je hier zelf toevoegen.',
+  earlier:'Eerder', later:'Later',
 }
 
 const STRINGS: Record<Lang, Record<Key, string>> = { en, nl }
@@ -113,8 +119,8 @@ export function makeI18n(lang: Lang) {
     dayShort: (d: Date) => fmt(d, { weekday: 'short', day: 'numeric', month: 'short' }),
     dayLong: (d: Date) => cap(fmt(d, { weekday: 'long', day: 'numeric', month: 'long' })),
     durLabel: (m: number) => (m === 60 ? t('h1') : m === 90 ? t('h15') : t('h2')),
-    tableName: (x: Table) => t(x.type === 'pool' ? 'poolTable' : 'snookerTable', { n: x.number }),
-    tableShort: (x: Table) => (x.type === 'pool' ? 'Pool ' : 'Snooker ') + x.number,
+    tableName: (x: Table) => t(`${x.type}Table`, { n: x.number }),
+    tableShort: (x: Table) => t(x.type) + ' ' + x.number,
   }
 }
 

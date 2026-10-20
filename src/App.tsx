@@ -12,7 +12,7 @@ import { initialSel, type Contact, type PlayerSel } from './player/state'
 import { VenueGate } from './venue/VenueGate'
 
 /** The one venue this build serves. */
-const VENUE_SLUG = 'de-peper'
+const VENUE_SLUG = 'pool-and-billiards-delft'
 
 export default function App() {
   const [lang, setLangState] = useState<Lang>(initialLang)

@@ -1,14 +1,16 @@
 # Keu
 
-Book a pool or snooker table at a pool café in Delft, a bit like Playtomic for padel.
-The first venue is **Poolcafé de Peper** (Peperstraat 13): 6 pool tables, 2 snooker tables.
+Book a pool, snooker or billiards table at a pool café in Delft, a bit like Playtomic for padel.
+The demo venue is **Pool and Billiards Delft** (Voorhofdreef 1): prices and hours from their
+site, table counts estimated (8 pool, 3 snooker, 2 biljart). The first demo venue, Poolcafé de
+Peper, declined and was removed.
 
-- **Book a table** (public, no login): pick pool or snooker, a day, how long, a time and a
-  table, then name, phone, players, student rate and payment. Availability comes from the real
-  bookings in the database.
+- **Book a table** (public, no login): pick a game, a day, how long, a time and a table, then
+  name, phone, players and payment. Availability comes from the real bookings in the database.
+  Online booking stops at the venue's last start time (21:00); later guests walk in.
 - **Venue view** (behind a PIN): a timeline of all tables per day. Tap a booking to mark it
   arrived, no-show or cancelled. Tap an empty spot to add a phone or WhatsApp booking. Settings
-  for walk-in tables and weekend prepayment.
+  for walk-in tables, the last online start time and weekend prepayment.
 
 It's still labelled a concept demo in the app (badge and footer) until the venue agrees to use it.
 The original single-file prototype is in [demo/keu-demo.html](demo/keu-demo.html).
@@ -46,15 +48,15 @@ applies new files there on every push to `main`, and records which ones it has r
    repo root), the production branch to `main`, and turn on **Deploy to production**.
 3. Check the first migration ran: **Table Editor** should list `venues`, `tables`, `bookings`
    and the rest. If it's empty, push a commit to `main` (or use **Sync** in the integration settings).
-   - No GitHub integration? Paste
-     [the init migration](supabase/migrations/20261010120000_init.sql) into **SQL Editor → New query**
-     and run it once instead. Don't do both, or the second run fails on tables that already exist.
+   - No GitHub integration? Paste each file in [supabase/migrations/](supabase/migrations/), oldest
+     first, into **SQL Editor → New query** and run it once instead. Don't do both, or the second
+     run fails on tables that already exist.
 4. Set the venue PIN. In **SQL Editor → New query**, with your own PIN or password in place of
    `change-me` (longer is safer; the login locks for 5 minutes after 5 wrong tries):
    ```sql
    update public.venue_settings
       set pin_hash = extensions.crypt('change-me', extensions.gen_salt('bf'))
-    where venue_id = (select id from public.venues where slug = 'de-peper');
+    where venue_id = (select id from public.venues where slug = 'pool-and-billiards-delft');
    ```
    Run the same statement again any time to change it. Never put the PIN in a migration file:
    the repo is public.
@@ -67,7 +69,7 @@ applies new files there on every push to `main`, and records which ones it has r
 
 ### Changing the database later
 
-Add a new file such as `supabase/migrations/20261101090000_add_student_flag.sql` with only the
+Add a new file such as `supabase/migrations/20261101090000_add_student_price.sql` with only the
 change (`alter table …`), commit and push. Never edit a migration that has already run.
 
 ### How access works
@@ -122,5 +124,7 @@ protects the data. Keeping it in secrets just keeps it out of the git history.
   not built.
 - **No spam protection** on public bookings beyond the database rules. Add rate limiting or a
   captcha before real traffic.
-- **One venue** (`de-peper`, set in `src/App.tsx`). The schema already supports more.
+- **One venue** (`pool-and-billiards-delft`, set in `src/App.tsx`). The schema already supports more.
+- **Table counts are estimates.** Correct them once known, e.g. add a migration that inserts or
+  deletes rows in `public.tables` for the venue.
 - Times use the phone's clock and time zone, which is fine while everyone is in Delft.

@@ -30,33 +30,37 @@ function fail(error: { code?: string; message: string }): never {
 export async function loadVenueInfo(slug: string): Promise<VenueInfo> {
   const { data: v, error } = await supabase
     .from('venues')
-    .select('id, slug, name, address, city, price_cents, student_price_cents, off_peak_price_cents')
+    .select('id, slug, name, address, city')
     .eq('slug', slug)
     .single()
   if (error) fail(error)
 
-  const [tables, hours, settings] = await Promise.all([
-    // 'snooker' > 'pool', so descending puts snooker first, like the venue timeline wants
+  const [tables, hours, settings, rates] = await Promise.all([
+    // descending type puts snooker, then pool, then carom: the venue timeline's order
     supabase.from('tables').select('id, type, number, walk_in').eq('venue_id', v.id)
       .order('type', { ascending: false }).order('number'),
     supabase.from('opening_hours').select('weekday, open_minutes, close_minutes').eq('venue_id', v.id),
-    supabase.from('venue_settings').select('hold_back, prepay_weekend').eq('venue_id', v.id).single(),
+    supabase.from('venue_settings').select('hold_back, prepay_weekend, last_start_minutes').eq('venue_id', v.id).single(),
+    supabase.from('rates').select('type, price_cents').eq('venue_id', v.id),
   ])
   if (tables.error) fail(tables.error)
   if (hours.error) fail(hours.error)
   if (settings.error) fail(settings.error)
+  if (rates.error) fail(rates.error)
 
   const week: (OpenHours | null)[] = Array(7).fill(null)
   for (const h of hours.data) week[h.weekday] = [h.open_minutes, h.close_minutes]
 
   return {
-    venue: {
-      id: v.id, slug: v.slug, name: v.name, address: v.address, city: v.city,
-      priceCents: v.price_cents, studentPriceCents: v.student_price_cents, offPeakPriceCents: v.off_peak_price_cents,
-    },
+    venue: { id: v.id, slug: v.slug, name: v.name, address: v.address, city: v.city },
     tables: tables.data.map(x => ({ id: x.id, type: x.type as GameType, number: x.number, walkIn: x.walk_in })),
     hours: week,
-    settings: { holdBack: settings.data.hold_back, prepayWeekend: settings.data.prepay_weekend },
+    settings: {
+      holdBack: settings.data.hold_back,
+      prepayWeekend: settings.data.prepay_weekend,
+      lastStart: settings.data.last_start_minutes,
+    },
+    rates: Object.fromEntries(rates.data.map(r => [r.type, r.price_cents])),
   }
 }
 
@@ -136,7 +140,7 @@ export async function setBookingStatus(id: string, status: BookingStatus): Promi
 
 export async function saveSettings(venueId: string, s: Settings): Promise<void> {
   const { data, error } = await supabase.from('venue_settings')
-    .update({ hold_back: s.holdBack, prepay_weekend: s.prepayWeekend })
+    .update({ hold_back: s.holdBack, prepay_weekend: s.prepayWeekend, last_start_minutes: s.lastStart })
     .eq('venue_id', venueId).select('venue_id')
   if (error) fail(error)
   if (!data.length) sessionLost()

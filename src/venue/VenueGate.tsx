@@ -59,7 +59,7 @@ export function VenueGate(props: Props) {
         </label>
         <button className="btn" type="submit" disabled={busy || !pin}>{t('unlock')}</button>
       </form>
-      <p className="foot">{t('footer')}</p>
+      <p className="foot">{t('footer', { venue: venue.name })}</p>
     </>
   )
 }
